@@ -1,0 +1,1118 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Aula Invertida - Taller de Desarrollo Profesional</title>
+  <meta name="description" content="Aprender Antes, Practicar en Clase y Potenciar el Pensamiento Crítico">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700;9..144,900&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
+  <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  <script src="https://unpkg.com/lucide-react@0.263.1/dist/umd/lucide-react.min.js"></script>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --primary: #1e3a5f;
+      --primary-light: #2d5a8a;
+      --secondary: #ff6b4a;
+      --accent: #ffd93d;
+      --success: #10b981;
+      --bg-cream: #faf8f5;
+      --bg-warm: #f5f0e8;
+      --text-dark: #1a1a2e;
+      --text-muted: #64748b;
+      --card-shadow: 0 4px 24px rgba(30, 58, 95, 0.08);
+      --card-hover: 0 12px 40px rgba(30, 58, 95, 0.15);
+    }
+    body {
+      font-family: 'DM Sans', sans-serif;
+      background: var(--bg-cream);
+      color: var(--text-dark);
+      line-height: 1.6;
+    }
+    h1, h2, h3, h4 { font-family: 'Fraunces', serif; font-weight: 700; }
+    @keyframes fadeInUp {
+      from { opacity: 0; transform: translateY(30px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes float {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-10px); }
+    }
+    .animate-in { animation: fadeInUp 0.6s ease-out forwards; }
+    .animate-delay-1 { animation-delay: 0.1s; opacity: 0; }
+    .animate-delay-2 { animation-delay: 0.2s; opacity: 0; }
+    .animate-delay-3 { animation-delay: 0.3s; opacity: 0; }
+    .float-anim { animation: float 6s ease-in-out infinite; }
+    
+    /* Scrollbar */
+    ::-webkit-scrollbar { width: 8px; }
+    ::-webkit-scrollbar-track { background: var(--bg-warm); }
+    ::-webkit-scrollbar-thumb { background: var(--primary-light); border-radius: 4px; }
+    ::-webkit-scrollbar-thumb:hover { background: var(--primary); }
+  </style>
+</head>
+<body>
+  <div id="root"></div>
+  
+  <script type="text/babel">
+    const { useState, useEffect } = React;
+    const { 
+      BookOpen, Play, Users, Brain, Lightbulb, Target, Clock, 
+      ChevronRight, ChevronDown, CheckCircle2, ArrowRight, 
+      Video, MessageCircle, Sparkles, Rocket, GraduationCap,
+      Monitor, Smartphone, Gamepad2, Bot, ClipboardCheck,
+      Home, Layers, Zap, Award, Menu, X, ExternalLink,
+      PlayCircle, PauseCircle, RotateCcw, Star, Heart
+    } = lucideReact;
+
+    // ============== DATOS ==============
+    const secciones = [
+      { id: 'inicio', nombre: 'Inicio', icon: Home },
+      { id: 'marco', nombre: 'Marco Conceptual', icon: BookOpen },
+      { id: 'modelo', nombre: 'Implementación', icon: Layers },
+      { id: 'actividades', nombre: 'Actividades', icon: Zap },
+      { id: 'niveles', nombre: 'Por Nivel', icon: GraduationCap },
+      { id: 'tecnologia', nombre: 'Tecnología', icon: Bot },
+      { id: 'evaluacion', nombre: 'Evaluación', icon: ClipboardCheck },
+      { id: 'fundamentos', nombre: 'Fundamentos', icon: Award },
+    ];
+
+    const comparacionModelos = [
+      { aspecto: 'Rol del estudiante', tradicional: 'Receptor pasivo', invertida: 'Constructor activo' },
+      { aspecto: 'Rol del maestro', tradicional: 'Transmisor de contenido', invertida: 'Facilitador del aprendizaje' },
+      { aspecto: 'Tiempo en clase', tradicional: 'Exposición magistral', invertida: 'Práctica y proyectos' },
+      { aspecto: 'Tarea en casa', tradicional: 'Práctica sin apoyo', invertida: 'Acceso al contenido teórico' },
+      { aspecto: 'Ritmo', tradicional: 'Único para todos', invertida: 'Personalizado' },
+      { aspecto: 'Retroalimentación', tradicional: 'Diferida', invertida: 'Inmediata en clase' },
+    ];
+
+    const fasesImplementacion = [
+      {
+        fase: 1, titulo: 'Antes de la Clase', icon: Video, color: '#ff6b4a',
+        tareasMaestro: ['Identificar objetivos específicos', 'Crear/seleccionar contenido 5-15 min', 'Diseñar guía con preguntas', 'Crear verificación breve', 'Compartir 2-3 días antes'],
+        tareasEstudiante: ['Acceder al material', 'Ver video a su ritmo', 'Tomar notas', 'Completar verificación', 'Identificar dudas']
+      },
+      {
+        fase: 2, titulo: 'Durante la Clase', icon: Users, color: '#10b981',
+        estructura: [
+          { tiempo: '5 min', actividad: 'Activación', desc: 'Conectar conocimiento previo' },
+          { tiempo: '10 min', actividad: 'Aclaración', desc: 'Resolver dudas del video' },
+          { tiempo: '25-30 min', actividad: 'Aplicación', desc: 'Trabajo colaborativo' },
+          { tiempo: '5-10 min', actividad: 'Síntesis', desc: 'Cierre y reflexión' }
+        ]
+      },
+      {
+        fase: 3, titulo: 'Después de la Clase', icon: ClipboardCheck, color: '#1e3a5f',
+        tareas: ['Revisar verificaciones', 'Analizar errores comunes', 'Dar retroalimentación', 'Ajustar próxima lección']
+      }
+    ];
+
+    const actividadesTaller = [
+      { n: 1, titulo: 'Experimentando el Aula Invertida', dur: '45 min', icon: PlayCircle, color: '#ff6b4a',
+        obj: 'Vivir la experiencia como estudiantes', 
+        pasos: ['Ver video neurociencia 24h antes', 'Completar reflexión', 'Discusión nube de palabras', 'Diseño grupal de estrategias', 'Presentaciones', 'Reflexión final'] },
+      { n: 2, titulo: 'Análisis Crítico de Videos', dur: '30 min', icon: Video, color: '#10b981',
+        obj: 'Desarrollar criterios de evaluación',
+        criterios: ['Duración 5-15 min', 'Claridad conceptual', 'Engagement visual', 'Preguntas integradas', 'Audio de calidad'] },
+      { n: 3, titulo: 'Reto Colaborativo', dur: '40 min', icon: Lightbulb, color: '#ffd93d',
+        obj: 'Resolver obstáculos comunes',
+        casos: ['No vieron el video', 'Sin internet', 'Quejas de padres', 'Resistencia estudiantil', 'Sin tiempo para grabar'] },
+      { n: 4, titulo: 'Diseña Tu Clase Invertida', dur: '60 min', icon: Rocket, color: '#1e3a5f',
+        obj: 'Crear plan de lección completo',
+        componentes: ['Tema y estándar', 'Recurso pre-clase', 'Verificación', 'Actividad aplicación', 'Evaluación'] },
+      { n: 5, titulo: 'Reflexión Pedagógica', dur: '20 min', icon: Heart, color: '#e91e63',
+        obj: 'Consolidar aprendizaje',
+        preguntas: ['¿Qué creencias reconsiderar?', '¿Beneficios para MIS estudiantes?', '¿Obstáculos anticipados?', '¿Mi compromiso concreto?'] }
+    ];
+
+    const actividadesPorNivel = {
+      elemental: {
+        nombre: 'Elemental (K-6)', color: '#10b981', colorLight: '#d1fae5',
+        actividades: [
+          { titulo: 'Videos Cortos + Preguntas', casa: '5-8 min video + 3 preguntas', clase: '40-45 min aplicación práctica' },
+          { titulo: 'Juegos de Aplicación', tipos: ['Estaciones', 'Búsqueda del tesoro', 'Kahoot equipos', 'Construye y explica'] },
+          { titulo: 'Dibujos Explicativos', pasos: ['Dibujar lo aprendido', 'Explicar a compañero', 'Hacer preguntas'] },
+          { titulo: 'Experimentos Simples', casa: 'Video concepto científico', clase: 'Experimento con hoja observación' }
+        ]
+      },
+      intermedio: {
+        nombre: 'Intermedio (7-9)', color: '#f59e0b', colorLight: '#fef3c7',
+        actividades: [
+          { titulo: 'Micro-lecciones + Debates', casa: '15-20 min + preparación "Dos Voces"', clase: '45-50 min debate con roles' },
+          { titulo: 'Retos Gamificados', elementos: ['Equipos 4-5 con roles', 'Dificultad escalonada', 'Sistema puntos', 'Leaderboard'] },
+          { titulo: 'Kahoot/Quizizz Estratégico', tip: 'Pausar después de cada pregunta para discutir POR QUÉ' },
+          { titulo: 'Resolución Problemas PR', protocolo: 'Entender → Planificar → Ejecutar → Verificar' }
+        ]
+      },
+      superior: {
+        nombre: 'Superior (10-12)', color: '#8b5cf6', colorLight: '#ede9fe',
+        actividades: [
+          { titulo: 'Videos + Análisis Crítico', casa: '30-40 min: video + análisis 1 página', clase: '50 min: discusión socrática + mapa conceptual' },
+          { titulo: 'Estudios de Caso', sesiones: ['Casa: Lectura caso + video', 'Clase 1: Análisis grupal', 'Clase 2: Presentación recomendaciones'],
+            ejemplos: ['Post-María', 'Crisis energética', 'Estatus político'] },
+          { titulo: 'Proyectos 2-4 Semanas', fases: ['Videos intro + definición', 'Tutoriales + investigación', 'Desarrollo con apoyo', 'Presentación'] },
+          { titulo: 'Aprendizaje Basado en Problemas', ejemplo: 'Diseñar sistema recolección agua para comunidades rurales PR' }
+        ]
+      }
+    };
+
+    const herramientasTech = [
+      { cat: 'Crear Contenido', icon: Video, tools: [
+        { nombre: 'YouTube Educativo', uso: 'Buscar canales calidad, crear playlists', tip: 'Siempre previsualizar completo' },
+        { nombre: 'Edpuzzle', uso: 'Insertar preguntas cada 2-3 min', tip: 'Revisar analíticas' },
+        { nombre: 'Google Classroom', uso: 'Asignaciones con video + formulario', tip: 'Programar publicaciones' }
+      ]},
+      { cat: 'IA como Tutor', icon: Bot, tools: [
+        { nombre: 'Para Maestros', uso: 'Guiones, preguntas variadas, rúbricas, ideas actividades' },
+        { nombre: 'Para Estudiantes', uso: 'Resolver dudas, práctica adicional, feedback', tip: '¡Verificar con fuentes confiables!' }
+      ]},
+      { cat: 'Gamificación', icon: Gamepad2, tools: [
+        { nombre: 'Kahoot', uso: 'Evaluación formativa rápida', car: 'Mejor en grupos; pausar para discutir' },
+        { nombre: 'Quizizz', uso: 'Práctica a ritmo individual', car: 'Menos presión; buenos reportes' },
+        { nombre: 'Gimkit', uso: 'Práctica extendida', car: 'Sistema economía motivador' },
+        { nombre: 'Blooket', uso: 'Variedad modos juego', car: 'Múltiples modos mantienen interés' }
+      ]},
+      { cat: 'Videos con IA', icon: Sparkles, tools: [
+        { nombre: 'Synthesia/HeyGen', uso: 'Videos con avatares IA' },
+        { nombre: 'Pictory/InVideo', uso: 'Convertir texto a video' },
+        { nombre: 'Canva con IA', uso: 'Presentaciones animadas' }
+      ]}
+    ];
+
+    const teorias = [
+      { t: 'Aprendizaje Activo', a: 'Bonwell & Eison, 1991', 
+        c: 'Estudiantes retienen 5% de conferencias pero 75% de lo que practican activamente.',
+        ap: 'El modelo invertido maximiza práctica activa con el maestro presente.',
+        dato: 'Freeman et al. (2014): +0.47 SD rendimiento, -55% fracaso' },
+      { t: 'Constructivismo', a: 'Piaget, Vygotsky',
+        c: 'El conocimiento se construye, no se transmite. Se aprende haciendo.',
+        ap: 'Zona de Desarrollo Próximo activada cuando maestro provee andamiaje durante aplicación.' },
+      { t: 'Taxonomía de Bloom', a: 'Anderson & Krathwohl, 2001',
+        c: 'Aula tradicional: habilidades bajas en clase CON maestro, altas de tarea SIN apoyo.',
+        ap: 'Aula invertida corrige: recordar/entender en casa, aplicar/analizar/crear en clase CON apoyo.' },
+      { t: 'Metacognición', a: 'Flavell, 1979',
+        c: '"Pensar sobre el propio pensamiento" - monitorear la propia comprensión.',
+        ap: 'Estudiar antes de clase activa: "¿Entendí esto?" "¿Qué no quedó claro?"' },
+      { t: 'Motivación Intrínseca', a: 'Deci & Ryan',
+        c: 'Tres necesidades: Autonomía, Competencia, Conexión.',
+        ap: 'Autonomía: control de ritmo. Competencia: aplicar con apoyo. Conexión: trabajo colaborativo.' }
+    ];
+
+    // ============== COMPONENTES ==============
+    const NavBar = ({ seccion, setSeccion, menuOpen, setMenuOpen }) => (
+      <nav style={{
+        position: 'fixed', top: 0, left: 0, right: 0, zIndex: 1000,
+        background: 'rgba(255,255,255,0.95)', backdropFilter: 'blur(10px)',
+        borderBottom: '1px solid rgba(30,58,95,0.1)', padding: '0.75rem 1.5rem'
+      }}>
+        <div style={{ maxWidth: '1400px', margin: '0 auto', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+            <div style={{
+              width: '40px', height: '40px', borderRadius: '10px',
+              background: 'linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%)',
+              display: 'flex', alignItems: 'center', justifyContent: 'center'
+            }}>
+              <RotateCcw size={22} color="white" />
+            </div>
+            <span style={{ fontFamily: 'Fraunces, serif', fontSize: '1.25rem', fontWeight: 700, color: 'var(--primary)' }}>
+              Aula Invertida
+            </span>
+          </div>
+          
+          <div style={{ display: 'flex', gap: '0.25rem', flexWrap: 'wrap' }} className="desktop-nav">
+            {secciones.map((s) => (
+              <button key={s.id} onClick={() => setSeccion(s.id)} style={{
+                padding: '0.5rem 0.75rem', border: 'none', borderRadius: '8px', cursor: 'pointer',
+                fontSize: '0.8rem', fontWeight: 500, transition: 'all 0.2s',
+                background: seccion === s.id ? 'var(--primary)' : 'transparent',
+                color: seccion === s.id ? 'white' : 'var(--text-dark)',
+                display: 'flex', alignItems: 'center', gap: '0.4rem'
+              }}>
+                <s.icon size={14} />
+                <span className="nav-text">{s.nombre}</span>
+              </button>
+            ))}
+          </div>
+          
+          <button onClick={() => setMenuOpen(!menuOpen)} className="mobile-menu" style={{
+            display: 'none', padding: '0.5rem', border: 'none', background: 'transparent', cursor: 'pointer'
+          }}>
+            {menuOpen ? <X size={24} /> : <Menu size={24} />}
+          </button>
+        </div>
+        
+        {menuOpen && (
+          <div style={{
+            position: 'absolute', top: '100%', left: 0, right: 0,
+            background: 'white', borderBottom: '1px solid rgba(30,58,95,0.1)',
+            padding: '1rem', display: 'flex', flexDirection: 'column', gap: '0.5rem'
+          }}>
+            {secciones.map((s) => (
+              <button key={s.id} onClick={() => { setSeccion(s.id); setMenuOpen(false); }} style={{
+                padding: '0.75rem 1rem', border: 'none', borderRadius: '8px', cursor: 'pointer',
+                fontSize: '1rem', fontWeight: 500, textAlign: 'left',
+                background: seccion === s.id ? 'var(--primary)' : 'var(--bg-warm)',
+                color: seccion === s.id ? 'white' : 'var(--text-dark)',
+                display: 'flex', alignItems: 'center', gap: '0.75rem'
+              }}>
+                <s.icon size={20} />
+                {s.nombre}
+              </button>
+            ))}
+          </div>
+        )}
+        
+        <style>{`
+          @media (max-width: 900px) {
+            .desktop-nav { display: none !important; }
+            .mobile-menu { display: block !important; }
+          }
+          @media (max-width: 1100px) {
+            .nav-text { display: none; }
+          }
+          @media (min-width: 1100px) {
+            .nav-text { display: inline; }
+          }
+        `}</style>
+      </nav>
+    );
+
+    const Card = ({ children, style = {}, hover = true }) => {
+      const [hovered, setHovered] = useState(false);
+      return (
+        <div
+          onMouseEnter={() => hover && setHovered(true)}
+          onMouseLeave={() => hover && setHovered(false)}
+          style={{
+            background: 'white', borderRadius: '16px', padding: '1.5rem',
+            boxShadow: hovered ? 'var(--card-hover)' : 'var(--card-shadow)',
+            transform: hovered ? 'translateY(-4px)' : 'translateY(0)',
+            transition: 'all 0.3s ease', ...style
+          }}
+        >
+          {children}
+        </div>
+      );
+    };
+
+    const Badge = ({ children, color = 'var(--primary)' }) => (
+      <span style={{
+        display: 'inline-flex', alignItems: 'center', padding: '0.25rem 0.75rem',
+        background: `${color}15`, color: color, borderRadius: '50px',
+        fontSize: '0.8rem', fontWeight: 600
+      }}>
+        {children}
+      </span>
+    );
+
+    const SectionHeader = ({ icon: Icon, title, subtitle }) => (
+      <div style={{ marginBottom: '3rem', textAlign: 'center' }} className="animate-in">
+        <div style={{
+          display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
+          width: '64px', height: '64px', borderRadius: '16px', marginBottom: '1.5rem',
+          background: 'linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%)'
+        }}>
+          <Icon size={32} color="white" />
+        </div>
+        <h2 style={{ fontSize: 'clamp(2rem, 4vw, 3rem)', margin: '0 0 0.75rem', color: 'var(--primary)' }}>
+          {title}
+        </h2>
+        {subtitle && (
+          <p style={{ fontSize: '1.125rem', color: 'var(--text-muted)', maxWidth: '600px', margin: '0 auto' }}>
+            {subtitle}
+          </p>
+        )}
+      </div>
+    );
+
+    // ============== SECCIONES ==============
+    const HeroSection = ({ onStart }) => (
+      <section style={{
+        minHeight: '100vh', display: 'flex', flexDirection: 'column',
+        justifyContent: 'center', alignItems: 'center', padding: '6rem 2rem 4rem',
+        background: 'linear-gradient(180deg, var(--bg-cream) 0%, var(--bg-warm) 100%)',
+        position: 'relative', overflow: 'hidden'
+      }}>
+        <div style={{
+          position: 'absolute', top: '10%', left: '5%', width: '300px', height: '300px',
+          background: 'radial-gradient(circle, rgba(255,107,74,0.1) 0%, transparent 70%)',
+          borderRadius: '50%'
+        }} className="float-anim" />
+        <div style={{
+          position: 'absolute', bottom: '15%', right: '10%', width: '200px', height: '200px',
+          background: 'radial-gradient(circle, rgba(30,58,95,0.08) 0%, transparent 70%)',
+          borderRadius: '50%', animationDelay: '-2s'
+        }} className="float-anim" />
+        
+        <div className="animate-in" style={{ textAlign: 'center', maxWidth: '900px' }}>
+          <div style={{
+            display: 'inline-flex', alignItems: 'center', gap: '0.5rem',
+            background: 'white', padding: '0.5rem 1rem', borderRadius: '50px',
+            marginBottom: '2rem', boxShadow: 'var(--card-shadow)'
+          }}>
+            <Sparkles size={16} color="var(--secondary)" />
+            <span style={{ fontSize: '0.875rem', fontWeight: 500, color: 'var(--text-muted)' }}>
+              Taller de Desarrollo Profesional
+            </span>
+          </div>
+          
+          <h1 style={{
+            fontSize: 'clamp(2.5rem, 6vw, 4.5rem)', lineHeight: 1.1, marginBottom: '1.5rem',
+            background: 'linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 50%, var(--secondary) 100%)',
+            WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text'
+          }}>
+            Aula Invertida
+          </h1>
+          
+          <p style={{ fontSize: 'clamp(1.25rem, 2.5vw, 1.75rem)', color: 'var(--text-muted)', marginBottom: '1rem', fontWeight: 500 }}>
+            Aprender Antes, Practicar en Clase
+          </p>
+          
+          <p style={{
+            fontSize: '1.125rem', color: 'var(--text-dark)', maxWidth: '600px',
+            margin: '0 auto 3rem', lineHeight: 1.7
+          }}>
+            Potencia el <strong>pensamiento crítico</strong> de tus estudiantes transformando 
+            tu práctica docente con estrategias basadas en investigación.
+          </p>
+          
+          <button onClick={onStart} style={{
+            display: 'inline-flex', alignItems: 'center', gap: '0.75rem',
+            padding: '1rem 2rem', background: 'var(--primary)', color: 'white',
+            border: 'none', borderRadius: '12px', fontSize: '1.125rem', fontWeight: 600,
+            cursor: 'pointer', boxShadow: '0 4px 15px rgba(30,58,95,0.3)'
+          }}>
+            Comenzar el Taller
+            <ArrowRight size={20} />
+          </button>
+        </div>
+        
+        <div style={{
+          display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))',
+          gap: '1.5rem', maxWidth: '1000px', width: '100%', marginTop: '4rem', padding: '0 1rem'
+        }}>
+          {[
+            { icon: Video, title: 'Contenido Pre-Clase', desc: 'Videos y recursos para estudiar antes' },
+            { icon: Users, title: 'Práctica en Clase', desc: 'Actividades colaborativas con apoyo' },
+            { icon: Brain, title: 'Pensamiento Crítico', desc: 'Desarrollo de habilidades superiores' },
+          ].map((item, i) => (
+            <Card key={i} style={{ display: 'flex', alignItems: 'flex-start', gap: '1rem' }}>
+              <div style={{
+                width: '48px', height: '48px', borderRadius: '12px', flexShrink: 0,
+                background: 'linear-gradient(135deg, var(--secondary) 0%, #ff8a6b 100%)',
+                display: 'flex', alignItems: 'center', justifyContent: 'center'
+              }}>
+                <item.icon size={24} color="white" />
+              </div>
+              <div>
+                <h3 style={{ margin: '0 0 0.25rem', fontSize: '1.125rem' }}>{item.title}</h3>
+                <p style={{ margin: 0, color: 'var(--text-muted)', fontSize: '0.9rem' }}>{item.desc}</p>
+              </div>
+            </Card>
+          ))}
+        </div>
+      </section>
+    );
+
+    const MarcoConceptual = () => (
+      <section style={{ padding: '6rem 2rem 4rem', maxWidth: '1200px', margin: '0 auto' }}>
+        <SectionHeader icon={BookOpen} title="Marco Conceptual" subtitle="Fundamentos del modelo de Aula Invertida" />
+        
+        <Card style={{ marginBottom: '2rem', background: 'linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%)', color: 'white' }}>
+          <h3 style={{ margin: '0 0 1rem', fontSize: '1.5rem' }}>¿Qué es el Aula Invertida?</h3>
+          <p style={{ margin: 0, fontSize: '1.1rem', lineHeight: 1.8, opacity: 0.95 }}>
+            Un modelo pedagógico donde los estudiantes <strong>acceden al contenido teórico ANTES de la clase</strong> 
+            (videos, lecturas) y el <strong>tiempo en clase se dedica a la aplicación</strong>, 
+            práctica y resolución de problemas con el apoyo del maestro.
+          </p>
+        </Card>
+        
+        <h3 style={{ textAlign: 'center', marginBottom: '1.5rem', color: 'var(--primary)' }}>
+          Comparación: Tradicional vs. Invertida
+        </h3>
+        
+        <div style={{ overflowX: 'auto' }}>
+          <table style={{
+            width: '100%', borderCollapse: 'separate', borderSpacing: '0',
+            background: 'white', borderRadius: '16px', overflow: 'hidden',
+            boxShadow: 'var(--card-shadow)', minWidth: '500px'
+          }}>
+            <thead>
+              <tr>
+                <th style={{ padding: '1rem', background: 'var(--bg-warm)', textAlign: 'left', fontWeight: 600 }}>Aspecto</th>
+                <th style={{ padding: '1rem', background: '#fef2f2', textAlign: 'left', fontWeight: 600, color: '#dc2626' }}>🏫 Tradicional</th>
+                <th style={{ padding: '1rem', background: '#ecfdf5', textAlign: 'left', fontWeight: 600, color: '#059669' }}>🔄 Invertida</th>
+              </tr>
+            </thead>
+            <tbody>
+              {comparacionModelos.map((row, i) => (
+                <tr key={i} style={{ borderTop: '1px solid var(--bg-warm)' }}>
+                  <td style={{ padding: '1rem', fontWeight: 500 }}>{row.aspecto}</td>
+                  <td style={{ padding: '1rem', color: 'var(--text-muted)' }}>{row.tradicional}</td>
+                  <td style={{ padding: '1rem', color: 'var(--success)', fontWeight: 500 }}>{row.invertida}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+        
+        <div style={{ marginTop: '3rem' }}>
+          <h3 style={{ textAlign: 'center', marginBottom: '1.5rem', color: 'var(--primary)' }}>Fundamentos Pedagógicos</h3>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1rem' }}>
+            {[
+              { title: 'Constructivismo', authors: 'Piaget, Vygotsky', icon: '🧠' },
+              { title: 'Aprendizaje Activo', authors: 'Bonwell & Eison', icon: '⚡' },
+              { title: 'Taxonomía de Bloom', authors: 'Anderson & Krathwohl', icon: '📊' },
+              { title: 'Metacognición', authors: 'Flavell', icon: '🪞' },
+            ].map((item, i) => (
+              <Card key={i}>
+                <div style={{ fontSize: '2rem', marginBottom: '0.5rem' }}>{item.icon}</div>
+                <h4 style={{ margin: '0 0 0.25rem', color: 'var(--primary)' }}>{item.title}</h4>
+                <p style={{ margin: 0, fontSize: '0.85rem', color: 'var(--text-muted)' }}>{item.authors}</p>
+              </Card>
+            ))}
+          </div>
+        </div>
+        
+        <Card style={{ marginTop: '2rem', background: 'linear-gradient(135deg, #fef3c7 0%, #fde68a 100%)', border: '2px solid #f59e0b' }} hover={false}>
+          <div style={{ display: 'flex', alignItems: 'flex-start', gap: '1rem' }}>
+            <Award size={32} color="#f59e0b" style={{ flexShrink: 0, marginTop: '0.25rem' }} />
+            <div>
+              <h4 style={{ margin: '0 0 0.5rem', color: '#92400e' }}>📚 Dato de Investigación</h4>
+              <p style={{ margin: 0, color: '#78350f', lineHeight: 1.7 }}>
+                El meta-análisis de <strong>Freeman et al. (2014)</strong> demostró que el aprendizaje activo 
+                aumenta el rendimiento en <strong>0.47 desviaciones estándar</strong> y reduce 
+                las tasas de fracaso en un <strong>55%</strong>.
+              </p>
+            </div>
+          </div>
+        </Card>
+      </section>
+    );
+
+    const ModeloImplementacion = () => (
+      <section style={{ padding: '6rem 2rem 4rem', maxWidth: '1200px', margin: '0 auto' }}>
+        <SectionHeader icon={Layers} title="Modelo de Implementación" subtitle="Las tres fases para una clase invertida exitosa" />
+        
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
+          {fasesImplementacion.map((fase, idx) => (
+            <Card key={idx} style={{ borderLeft: `4px solid ${fase.color}`, position: 'relative', overflow: 'visible' }}>
+              <div style={{
+                position: 'absolute', top: '-12px', left: '20px',
+                background: fase.color, color: 'white', padding: '0.25rem 1rem',
+                borderRadius: '50px', fontSize: '0.8rem', fontWeight: 700
+              }}>
+                FASE {fase.fase}
+              </div>
+              
+              <div style={{ marginTop: '0.5rem' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '1.5rem' }}>
+                  <div style={{
+                    width: '48px', height: '48px', borderRadius: '12px',
+                    background: `${fase.color}15`, display: 'flex', alignItems: 'center', justifyContent: 'center'
+                  }}>
+                    <fase.icon size={24} color={fase.color} />
+                  </div>
+                  <h3 style={{ margin: 0, color: fase.color, fontSize: '1.5rem' }}>{fase.titulo}</h3>
+                </div>
+                
+                {fase.tareasMaestro && (
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '1.5rem' }}>
+                    <div>
+                      <h4 style={{ margin: '0 0 1rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                        <GraduationCap size={18} color="var(--primary)" /> Tareas del Maestro
+                      </h4>
+                      <ul style={{ margin: 0, paddingLeft: '1.25rem', lineHeight: 1.8 }}>
+                        {fase.tareasMaestro.map((t, i) => <li key={i} style={{ color: 'var(--text-muted)' }}>{t}</li>)}
+                      </ul>
+                    </div>
+                    <div>
+                      <h4 style={{ margin: '0 0 1rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                        <Users size={18} color="var(--secondary)" /> Tareas del Estudiante
+                      </h4>
+                      <ul style={{ margin: 0, paddingLeft: '1.25rem', lineHeight: 1.8 }}>
+                        {fase.tareasEstudiante.map((t, i) => <li key={i} style={{ color: 'var(--text-muted)' }}>{t}</li>)}
+                      </ul>
+                    </div>
+                  </div>
+                )}
+                
+                {fase.estructura && (
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '1rem' }}>
+                    {fase.estructura.map((item, i) => (
+                      <div key={i} style={{ background: 'var(--bg-warm)', padding: '1rem', borderRadius: '12px', textAlign: 'center' }}>
+                        <div style={{
+                          background: fase.color, color: 'white', display: 'inline-block',
+                          padding: '0.25rem 0.75rem', borderRadius: '50px', fontSize: '0.8rem', fontWeight: 700, marginBottom: '0.5rem'
+                        }}>
+                          {item.tiempo}
+                        </div>
+                        <h5 style={{ margin: '0.5rem 0 0.25rem', color: 'var(--primary)' }}>{item.actividad}</h5>
+                        <p style={{ margin: 0, fontSize: '0.85rem', color: 'var(--text-muted)' }}>{item.desc}</p>
+                      </div>
+                    ))}
+                  </div>
+                )}
+                
+                {fase.tareas && (
+                  <ul style={{ margin: 0, paddingLeft: '1.25rem', lineHeight: 1.8 }}>
+                    {fase.tareas.map((t, i) => <li key={i} style={{ color: 'var(--text-muted)' }}>{t}</li>)}
+                  </ul>
+                )}
+              </div>
+            </Card>
+          ))}
+        </div>
+      </section>
+    );
+
+    const ActividadesTaller = () => {
+      const [open, setOpen] = useState(0);
+      return (
+        <section style={{ padding: '6rem 2rem 4rem', background: 'var(--bg-warm)' }}>
+          <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
+            <SectionHeader icon={Zap} title="Actividades del Taller" subtitle="5 experiencias prácticas para transformar tu práctica docente" />
+            
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '1.5rem' }}>
+              {actividadesTaller.map((act, idx) => (
+                <Card key={idx} style={{ borderTop: `4px solid ${act.color}`, cursor: 'pointer' }} onClick={() => setOpen(open === idx ? -1 : idx)}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '1rem' }}>
+                    <div style={{
+                      width: '56px', height: '56px', borderRadius: '12px',
+                      background: `${act.color}15`, display: 'flex', alignItems: 'center', justifyContent: 'center'
+                    }}>
+                      <act.icon size={28} color={act.color} />
+                    </div>
+                    <Badge color={act.color}><Clock size={12} style={{ marginRight: '4px' }} />{act.dur}</Badge>
+                  </div>
+                  
+                  <div style={{
+                    display: 'inline-block', background: act.color, color: 'white',
+                    width: '28px', height: '28px', borderRadius: '50%', textAlign: 'center',
+                    lineHeight: '28px', fontWeight: 700, fontSize: '0.9rem', marginBottom: '0.75rem'
+                  }}>
+                    {act.n}
+                  </div>
+                  
+                  <h3 style={{ margin: '0 0 0.5rem', fontSize: '1.25rem', color: 'var(--primary)' }}>{act.titulo}</h3>
+                  <p style={{ margin: '0 0 1rem', color: 'var(--text-muted)', fontSize: '0.9rem', lineHeight: 1.6 }}>{act.obj}</p>
+                  
+                  <div style={{ maxHeight: open === idx ? '500px' : '0', overflow: 'hidden', transition: 'max-height 0.4s ease' }}>
+                    <div style={{ borderTop: '1px solid var(--bg-warm)', paddingTop: '1rem', marginTop: '0.5rem' }}>
+                      {act.pasos && (
+                        <ol style={{ margin: 0, paddingLeft: '1.25rem', lineHeight: 1.8, fontSize: '0.9rem' }}>
+                          {act.pasos.map((p, i) => <li key={i} style={{ color: 'var(--text-muted)' }}>{p}</li>)}
+                        </ol>
+                      )}
+                      {act.criterios && (
+                        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem' }}>
+                          {act.criterios.map((c, i) => (
+                            <span key={i} style={{ background: 'var(--bg-warm)', padding: '0.25rem 0.75rem', borderRadius: '50px', fontSize: '0.8rem' }}>
+                              ✓ {c}
+                            </span>
+                          ))}
+                        </div>
+                      )}
+                      {act.casos && (
+                        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem' }}>
+                          {act.casos.map((c, i) => (
+                            <span key={i} style={{ background: '#fef3c7', padding: '0.25rem 0.75rem', borderRadius: '50px', fontSize: '0.8rem' }}>
+                              ⚠️ {c}
+                            </span>
+                          ))}
+                        </div>
+                      )}
+                      {act.componentes && (
+                        <ul style={{ margin: 0, paddingLeft: '1.25rem', lineHeight: 1.8, fontSize: '0.9rem' }}>
+                          {act.componentes.map((c, i) => <li key={i} style={{ color: 'var(--text-muted)' }}>{c}</li>)}
+                        </ul>
+                      )}
+                      {act.preguntas && (
+                        <ul style={{ margin: 0, paddingLeft: '1.25rem', lineHeight: 1.8, fontSize: '0.9rem' }}>
+                          {act.preguntas.map((p, i) => <li key={i} style={{ color: 'var(--text-muted)', fontStyle: 'italic' }}>{p}</li>)}
+                        </ul>
+                      )}
+                    </div>
+                  </div>
+                  
+                  <button style={{
+                    display: 'flex', alignItems: 'center', gap: '0.5rem', marginTop: '1rem',
+                    padding: '0.5rem 1rem', border: 'none', background: 'var(--bg-warm)',
+                    borderRadius: '8px', cursor: 'pointer', fontSize: '0.85rem', fontWeight: 500,
+                    color: 'var(--primary)', width: '100%', justifyContent: 'center'
+                  }}>
+                    {open === idx ? 'Ver menos' : 'Ver detalles'}
+                    <ChevronDown size={16} style={{ transform: open === idx ? 'rotate(180deg)' : 'rotate(0)', transition: 'transform 0.3s' }} />
+                  </button>
+                </Card>
+              ))}
+            </div>
+          </div>
+        </section>
+      );
+    };
+
+    const ActividadesPorNivel = () => {
+      const [nivel, setNivel] = useState('elemental');
+      const niveles = [
+        { id: 'elemental', nombre: 'Elemental (K-6)', color: '#10b981', icon: Star },
+        { id: 'intermedio', nombre: 'Intermedio (7-9)', color: '#f59e0b', icon: Zap },
+        { id: 'superior', nombre: 'Superior (10-12)', color: '#8b5cf6', icon: Rocket }
+      ];
+      const data = actividadesPorNivel[nivel];
+      
+      return (
+        <section style={{ padding: '6rem 2rem 4rem', maxWidth: '1200px', margin: '0 auto' }}>
+          <SectionHeader icon={GraduationCap} title="Actividades por Nivel" subtitle="Estrategias adaptadas a cada etapa del desarrollo" />
+          
+          <div style={{
+            display: 'flex', gap: '0.5rem', padding: '0.5rem', background: 'var(--bg-warm)',
+            borderRadius: '12px', marginBottom: '2rem', flexWrap: 'wrap', justifyContent: 'center'
+          }}>
+            {niveles.map((n) => (
+              <button key={n.id} onClick={() => setNivel(n.id)} style={{
+                padding: '0.75rem 1.5rem', border: 'none', borderRadius: '8px', cursor: 'pointer',
+                fontSize: '0.9rem', fontWeight: 600, transition: 'all 0.2s',
+                background: nivel === n.id ? n.color : 'transparent',
+                color: nivel === n.id ? 'white' : 'var(--text-dark)',
+                display: 'flex', alignItems: 'center', gap: '0.5rem'
+              }}>
+                <n.icon size={18} />
+                {n.nombre}
+              </button>
+            ))}
+          </div>
+          
+          <div style={{
+            background: data.colorLight, borderRadius: '20px', padding: '2rem', border: `2px solid ${data.color}`
+          }}>
+            <h3 style={{ margin: '0 0 1.5rem', color: data.color, fontSize: '1.75rem' }}>{data.nombre}</h3>
+            
+            <div style={{ display: 'grid', gap: '1.5rem' }}>
+              {data.actividades.map((act, idx) => (
+                <Card key={idx} style={{ background: 'white' }}>
+                  <h4 style={{ margin: '0 0 1rem', color: data.color, display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                    <ChevronRight size={20} />{act.titulo}
+                  </h4>
+                  
+                  {act.casa && (
+                    <div style={{ marginBottom: '0.75rem' }}>
+                      <Badge color="#6366f1">🏠 En Casa</Badge>
+                      <p style={{ margin: '0.5rem 0 0', color: 'var(--text-muted)', fontSize: '0.9rem' }}>{act.casa}</p>
+                    </div>
+                  )}
+                  {act.clase && (
+                    <div style={{ marginBottom: '0.75rem' }}>
+                      <Badge color="#10b981">🏫 En Clase</Badge>
+                      <p style={{ margin: '0.5rem 0 0', color: 'var(--text-muted)', fontSize: '0.9rem' }}>{act.clase}</p>
+                    </div>
+                  )}
+                  {act.tipos && (
+                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem', marginTop: '0.5rem' }}>
+                      {act.tipos.map((t, i) => (
+                        <span key={i} style={{
+                          background: `${data.color}15`, color: data.color,
+                          padding: '0.35rem 0.75rem', borderRadius: '8px', fontSize: '0.85rem', fontWeight: 500
+                        }}>{t}</span>
+                      ))}
+                    </div>
+                  )}
+                  {act.pasos && (
+                    <ol style={{ margin: '0.75rem 0 0', paddingLeft: '1.25rem', lineHeight: 1.8, fontSize: '0.9rem' }}>
+                      {act.pasos.map((p, i) => <li key={i} style={{ color: 'var(--text-muted)' }}>{p}</li>)}
+                    </ol>
+                  )}
+                  {act.elementos && (
+                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem', marginTop: '0.5rem' }}>
+                      {act.elementos.map((e, i) => (
+                        <span key={i} style={{ background: 'var(--bg-warm)', padding: '0.35rem 0.75rem', borderRadius: '8px', fontSize: '0.85rem' }}>
+                          ✓ {e}
+                        </span>
+                      ))}
+                    </div>
+                  )}
+                  {act.tip && (
+                    <p style={{
+                      margin: '0.75rem 0 0', padding: '0.75rem 1rem', background: '#fef3c7',
+                      borderRadius: '8px', fontSize: '0.9rem', color: '#92400e'
+                    }}>
+                      <strong>💡 Estrategia:</strong> {act.tip}
+                    </p>
+                  )}
+                  {act.protocolo && (
+                    <div style={{ marginTop: '0.75rem' }}>
+                      <strong style={{ fontSize: '0.9rem' }}>Protocolo:</strong>
+                      <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem', marginTop: '0.5rem', alignItems: 'center' }}>
+                        {act.protocolo.split(' → ').map((p, i, arr) => (
+                          <React.Fragment key={i}>
+                            <span style={{
+                              background: data.color, color: 'white',
+                              padding: '0.35rem 0.75rem', borderRadius: '8px', fontSize: '0.85rem', fontWeight: 500
+                            }}>{p}</span>
+                            {i < arr.length - 1 && <ArrowRight size={16} color="var(--text-muted)" />}
+                          </React.Fragment>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                  {act.sesiones && (
+                    <div style={{ marginTop: '0.75rem' }}>
+                      {act.sesiones.map((s, i) => (
+                        <div key={i} style={{ display: 'flex', alignItems: 'flex-start', gap: '0.75rem', marginBottom: '0.5rem' }}>
+                          <div style={{
+                            width: '24px', height: '24px', background: data.color, color: 'white',
+                            borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center',
+                            fontSize: '0.75rem', fontWeight: 700, flexShrink: 0
+                          }}>{i + 1}</div>
+                          <span style={{ fontSize: '0.9rem', color: 'var(--text-muted)' }}>{s}</span>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                  {act.fases && (
+                    <div style={{ marginTop: '0.75rem' }}>
+                      {act.fases.map((f, i) => (
+                        <div key={i} style={{ display: 'flex', alignItems: 'flex-start', gap: '0.75rem', marginBottom: '0.5rem' }}>
+                          <CheckCircle2 size={18} color={data.color} style={{ flexShrink: 0, marginTop: '2px' }} />
+                          <span style={{ fontSize: '0.9rem', color: 'var(--text-muted)' }}>{f}</span>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                  {act.ejemplo && (
+                    <div style={{ background: 'var(--bg-warm)', padding: '0.75rem 1rem', borderRadius: '8px', marginTop: '0.75rem' }}>
+                      <strong style={{ fontSize: '0.85rem' }}>💡 Ejemplo:</strong>
+                      <span style={{ fontSize: '0.9rem', color: 'var(--text-muted)', marginLeft: '0.5rem' }}>{act.ejemplo}</span>
+                    </div>
+                  )}
+                  {act.ejemplos && (
+                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem', marginTop: '0.75rem' }}>
+                      {act.ejemplos.map((e, i) => (
+                        <span key={i} style={{ background: 'var(--bg-warm)', padding: '0.35rem 0.75rem', borderRadius: '8px', fontSize: '0.85rem' }}>
+                          📋 {e}
+                        </span>
+                      ))}
+                    </div>
+                  )}
+                </Card>
+              ))}
+            </div>
+          </div>
+        </section>
+      );
+    };
+
+    const TecnologiaIA = () => (
+      <section style={{ padding: '6rem 2rem 4rem', background: 'linear-gradient(180deg, var(--bg-cream) 0%, #e8f4f8 100%)' }}>
+        <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
+          <SectionHeader icon={Bot} title="Tecnología e IA" subtitle="Herramientas para potenciar tu aula invertida" />
+          
+          <div style={{ display: 'grid', gap: '2rem' }}>
+            {herramientasTech.map((cat, idx) => (
+              <Card key={idx} style={{ background: 'white' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '1.5rem' }}>
+                  <div style={{
+                    width: '48px', height: '48px', borderRadius: '12px',
+                    background: 'linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%)',
+                    display: 'flex', alignItems: 'center', justifyContent: 'center'
+                  }}>
+                    <cat.icon size={24} color="white" />
+                  </div>
+                  <h3 style={{ margin: 0, color: 'var(--primary)' }}>{cat.cat}</h3>
+                </div>
+                
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '1rem' }}>
+                  {cat.tools.map((tool, i) => (
+                    <div key={i} style={{ background: 'var(--bg-warm)', padding: '1.25rem', borderRadius: '12px' }}>
+                      <h4 style={{ margin: '0 0 0.5rem', color: 'var(--primary)', fontSize: '1.1rem' }}>{tool.nombre}</h4>
+                      <p style={{ margin: '0 0 0.75rem', color: 'var(--text-muted)', fontSize: '0.9rem', lineHeight: 1.6 }}>{tool.uso}</p>
+                      {tool.tip && (
+                        <div style={{ background: '#fef3c7', padding: '0.5rem 0.75rem', borderRadius: '8px', fontSize: '0.8rem', color: '#92400e' }}>
+                          💡 <strong>Tip:</strong> {tool.tip}
+                        </div>
+                      )}
+                      {tool.car && (
+                        <div style={{ background: '#ecfdf5', padding: '0.5rem 0.75rem', borderRadius: '8px', fontSize: '0.8rem', color: '#065f46' }}>
+                          ✓ {tool.car}
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              </Card>
+            ))}
+          </div>
+          
+          <Card style={{ marginTop: '2rem', background: 'linear-gradient(135deg, #fef2f2 0%, #fee2e2 100%)', border: '2px solid #ef4444' }} hover={false}>
+            <div style={{ display: 'flex', alignItems: 'flex-start', gap: '1rem' }}>
+              <div style={{
+                width: '48px', height: '48px', background: '#ef4444', borderRadius: '12px',
+                display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0
+              }}>
+                <Sparkles size={24} color="white" />
+              </div>
+              <div>
+                <h4 style={{ margin: '0 0 0.5rem', color: '#991b1b' }}>⚠️ Principios para Videos con IA</h4>
+                <ul style={{ margin: 0, paddingLeft: '1.25rem', lineHeight: 1.8, color: '#7f1d1d' }}>
+                  <li>Videos cortos (5-10 min máximo)</li>
+                  <li>Un concepto principal por video</li>
+                  <li>Lenguaje claro y apropiado</li>
+                  <li><strong>Siempre revisar contenido generado</strong></li>
+                  <li>Combinar con preguntas interactivas</li>
+                </ul>
+              </div>
+            </div>
+          </Card>
+        </div>
+      </section>
+    );
+
+    const Evaluacion = () => {
+      const tipos = [
+        { tipo: 'Diagnóstica (Antes)', color: '#6366f1', icon: '🔍',
+          estrategias: [
+            { n: 'Quiz de entrada', h: 'Edpuzzle, Google Forms', d: '3-5 preguntas sobre el video' },
+            { n: 'Ticket de entrada', h: 'Padlet, Mentimeter', d: '"¿Qué aprendiste? ¿Qué preguntas?"' },
+            { n: 'Resumen breve', h: 'Google Docs', d: '3 ideas principales en 2-3 oraciones' }
+          ]},
+        { tipo: 'Formativa (Durante)', color: '#10b981', icon: '👁️',
+          estrategias: [
+            { n: 'Observación activa', d: 'Circular, escuchar, hacer preguntas de sondeo' },
+            { n: 'Pulgares arriba/abajo', d: 'Verificación rápida grupal' },
+            { n: 'Think-Pair-Share', d: 'Pensar, discutir en parejas, compartir' },
+            { n: 'Ticket de salida', d: '"Hoy aprendí...", "Tengo dudas sobre..."' }
+          ]},
+        { tipo: 'Sumativa', color: '#f59e0b', icon: '📊',
+          estrategias: [
+            { n: 'Proyectos', d: 'Productos que demuestran aplicación' },
+            { n: 'Presentaciones', d: 'Exposición oral con rúbrica' },
+            { n: 'Portafolios', d: 'Colección de evidencias' },
+            { n: 'Demostraciones', d: 'Demostrar destreza en vivo' }
+          ]}
+      ];
+      
+      return (
+        <section style={{ padding: '6rem 2rem 4rem', maxWidth: '1200px', margin: '0 auto' }}>
+          <SectionHeader icon={ClipboardCheck} title="Estrategias de Evaluación" subtitle="Múltiples formas de verificar y apoyar el aprendizaje" />
+          
+          <div style={{ display: 'grid', gap: '2rem' }}>
+            {tipos.map((t, idx) => (
+              <Card key={idx} style={{ borderLeft: `4px solid ${t.color}` }}>
+                <h3 style={{ margin: '0 0 1.5rem', color: t.color, display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                  <span style={{ fontSize: '1.5rem' }}>{t.icon}</span>
+                  {t.tipo}
+                </h3>
+                
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: '1rem' }}>
+                  {t.estrategias.map((e, i) => (
+                    <div key={i} style={{ background: 'var(--bg-warm)', padding: '1rem', borderRadius: '12px' }}>
+                      <h4 style={{ margin: '0 0 0.5rem', color: 'var(--primary)', fontSize: '1rem' }}>{e.n}</h4>
+                      <p style={{ margin: 0, color: 'var(--text-muted)', fontSize: '0.9rem', lineHeight: 1.6 }}>{e.d}</p>
+                      {e.h && (
+                        <span style={{
+                          display: 'inline-block', marginTop: '0.5rem',
+                          background: `${t.color}20`, color: t.color,
+                          padding: '0.25rem 0.5rem', borderRadius: '4px', fontSize: '0.75rem', fontWeight: 500
+                        }}>
+                          🛠️ {e.h}
+                        </span>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              </Card>
+            ))}
+          </div>
+        </section>
+      );
+    };
+
+    const Fundamentos = () => (
+      <section style={{ padding: '6rem 2rem 4rem', background: 'var(--bg-warm)' }}>
+        <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
+          <SectionHeader icon={Award} title="Fundamentos Académicos" subtitle="La ciencia detrás del aula invertida" />
+          
+          <div style={{ display: 'grid', gap: '1.5rem' }}>
+            {teorias.map((teoria, idx) => (
+              <Card key={idx}>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '0.5rem', marginBottom: '1rem' }}>
+                  <h3 style={{ margin: 0, color: 'var(--primary)', fontSize: '1.35rem' }}>{teoria.t}</h3>
+                  <Badge color="var(--text-muted)">{teoria.a}</Badge>
+                </div>
+                
+                <div style={{
+                  background: 'var(--bg-warm)', padding: '1rem', borderRadius: '12px',
+                  borderLeft: '3px solid var(--secondary)', marginBottom: '1rem'
+                }}>
+                  <strong style={{ color: 'var(--primary)', fontSize: '0.85rem' }}>CONCEPTO:</strong>
+                  <p style={{ margin: '0.5rem 0 0', color: 'var(--text-dark)', lineHeight: 1.7 }}>{teoria.c}</p>
+                </div>
+                
+                <div style={{
+                  background: '#ecfdf5', padding: '1rem', borderRadius: '12px', borderLeft: '3px solid var(--success)'
+                }}>
+                  <strong style={{ color: '#065f46', fontSize: '0.85rem' }}>APLICACIÓN:</strong>
+                  <p style={{ margin: '0.5rem 0 0', color: '#047857', lineHeight: 1.7 }}>{teoria.ap}</p>
+                </div>
+                
+                {teoria.dato && (
+                  <div style={{
+                    background: '#fef3c7', padding: '1rem', borderRadius: '12px',
+                    display: 'flex', alignItems: 'flex-start', gap: '0.75rem', marginTop: '1rem'
+                  }}>
+                    <span style={{ fontSize: '1.25rem' }}>📊</span>
+                    <p style={{ margin: 0, color: '#92400e', lineHeight: 1.6, fontSize: '0.9rem' }}>
+                      <strong>Evidencia:</strong> {teoria.dato}
+                    </p>
+                  </div>
+                )}
+              </Card>
+            ))}
+          </div>
+          
+          <Card style={{ marginTop: '3rem', background: 'linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%)', color: 'white' }} hover={false}>
+            <h3 style={{ margin: '0 0 1.5rem', fontSize: '1.5rem' }}>📚 Referencias Académicas</h3>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '1rem' }}>
+              {[
+                'Anderson & Krathwohl (2001). Taxonomy for Learning.',
+                'Bergmann & Sams (2012). Flip Your Classroom.',
+                'Bonwell & Eison (1991). Active Learning.',
+                'Freeman et al. (2014). Active Learning in STEM.',
+                'Deci & Ryan (2000). Self-Determination Theory.',
+                'Flavell (1979). Metacognition.'
+              ].map((ref, i) => (
+                <div key={i} style={{
+                  background: 'rgba(255,255,255,0.1)', padding: '0.75rem 1rem',
+                  borderRadius: '8px', fontSize: '0.85rem', lineHeight: 1.5
+                }}>
+                  {ref}
+                </div>
+              ))}
+            </div>
+          </Card>
+        </div>
+      </section>
+    );
+
+    const Conclusion = ({ onRestart }) => (
+      <section style={{
+        padding: '6rem 2rem', textAlign: 'center',
+        background: 'linear-gradient(180deg, var(--bg-warm) 0%, var(--bg-cream) 100%)'
+      }}>
+        <div style={{ maxWidth: '800px', margin: '0 auto' }}>
+          <div style={{
+            width: '80px', height: '80px', borderRadius: '50%', margin: '0 auto 2rem',
+            background: 'linear-gradient(135deg, var(--success) 0%, #34d399 100%)',
+            display: 'flex', alignItems: 'center', justifyContent: 'center'
+          }}>
+            <CheckCircle2 size={40} color="white" />
+          </div>
+          
+          <h2 style={{ fontSize: 'clamp(1.75rem, 4vw, 2.5rem)', color: 'var(--primary)', margin: '0 0 1rem' }}>
+            ¡Transforma tu Práctica!
+          </h2>
+          
+          <p style={{ fontSize: '1.125rem', color: 'var(--text-muted)', lineHeight: 1.8, marginBottom: '2rem' }}>
+            El Aula Invertida redefine roles: maestro de <strong>transmisor a facilitador</strong>, 
+            estudiante de <strong>receptor pasivo a protagonista activo</strong>.
+          </p>
+          
+          <Card style={{ textAlign: 'left', marginBottom: '2rem' }} hover={false}>
+            <h4 style={{ margin: '0 0 1rem', color: 'var(--primary)' }}>🚀 Próximos Pasos</h4>
+            <ol style={{ margin: 0, paddingLeft: '1.5rem', lineHeight: 2 }}>
+              <li>Selecciona <strong>UNA lección</strong> para invertir en 2 semanas</li>
+              <li>Encuentra o crea un video (YouTube existente está bien)</li>
+              <li>Diseña verificación simple (quiz 5 preguntas)</li>
+              <li>Planifica actividad de aplicación en clase</li>
+              <li>Comunica a estudiantes y padres</li>
+              <li>Implementa, observa, ajusta</li>
+              <li>Comparte con colegas</li>
+            </ol>
+          </Card>
+          
+          <button onClick={onRestart} style={{
+            display: 'inline-flex', alignItems: 'center', gap: '0.75rem',
+            padding: '1rem 2rem', background: 'var(--primary)', color: 'white',
+            border: 'none', borderRadius: '12px', fontSize: '1.125rem', fontWeight: 600, cursor: 'pointer'
+          }}>
+            <RotateCcw size={20} />
+            Volver al Inicio
+          </button>
+        </div>
+      </section>
+    );
+
+    // ============== APP PRINCIPAL ==============
+    const App = () => {
+      const [seccion, setSeccion] = useState('inicio');
+      const [menuOpen, setMenuOpen] = useState(false);
+      
+      useEffect(() => {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      }, [seccion]);
+      
+      const renderSeccion = () => {
+        switch (seccion) {
+          case 'inicio': return <HeroSection onStart={() => setSeccion('marco')} />;
+          case 'marco': return <MarcoConceptual />;
+          case 'modelo': return <ModeloImplementacion />;
+          case 'actividades': return <ActividadesTaller />;
+          case 'niveles': return <ActividadesPorNivel />;
+          case 'tecnologia': return <TecnologiaIA />;
+          case 'evaluacion': return <Evaluacion />;
+          case 'fundamentos': return (
+            <>
+              <Fundamentos />
+              <Conclusion onRestart={() => setSeccion('inicio')} />
+            </>
+          );
+          default: return <HeroSection onStart={() => setSeccion('marco')} />;
+        }
+      };
+      
+      const currentIdx = secciones.findIndex(s => s.id === seccion);
+      
+      return (
+        <div style={{ minHeight: '100vh', background: 'var(--bg-cream)' }}>
+          <NavBar seccion={seccion} setSeccion={setSeccion} menuOpen={menuOpen} setMenuOpen={setMenuOpen} />
+          <main style={{ paddingTop: '60px' }}>
+            {renderSeccion()}
+          </main>
+          
+          {seccion !== 'inicio' && (
+            <div style={{
+              position: 'fixed', bottom: '2rem', right: '2rem',
+              display: 'flex', gap: '0.75rem', zIndex: 100
+            }}>
+              {currentIdx > 0 && (
+                <button onClick={() => setSeccion(secciones[currentIdx - 1].id)} style={{
+                  width: '48px', height: '48px', borderRadius: '50%', border: 'none',
+                  background: 'white', boxShadow: 'var(--card-shadow)', cursor: 'pointer',
+                  display: 'flex', alignItems: 'center', justifyContent: 'center'
+                }}>
+                  <ChevronRight size={24} color="var(--primary)" style={{ transform: 'rotate(180deg)' }} />
+                </button>
+              )}
+              {currentIdx < secciones.length - 1 && (
+                <button onClick={() => setSeccion(secciones[currentIdx + 1].id)} style={{
+                  width: '48px', height: '48px', borderRadius: '50%', border: 'none',
+                  background: 'var(--primary)', boxShadow: 'var(--card-shadow)', cursor: 'pointer',
+                  display: 'flex', alignItems: 'center', justifyContent: 'center'
+                }}>
+                  <ChevronRight size={24} color="white" />
+                </button>
+              )}
+            </div>
+          )}
+        </div>
+      );
+    };
+
+    ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+  </script>
+</body>
+</html>
